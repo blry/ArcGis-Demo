@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>2D map - 4.3</title>
+  <style>
+    html, body, #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+    .esri-popup--top-aligned{
+        opacity: 0.9
+    }
+  </style>
+
+  <link rel="stylesheet" href="main.css">
+  <script src="init.js"></script>
+
+  <script>
+    require(["esri/Map", "esri/views/MapView",
+        "esri/layers/GraphicsLayer", "esri/Graphic",
+        "esri/geometry/Point", "esri/symbols/SimpleMarkerSymbol",
+        "esri/widgets/Locate", "esri/widgets/Locate/LocateViewModel",
+        "esri/geometry/Polyline", "esri/symbols/SimpleLineSymbol",
+        "dojo/on", "dojo/domReady!"
+    ], function(Map, MapView, 
+        GraphicsLayer, Graphic, 
+        Point, SimpleMarkerSymbol, 
+        Locate, LocateViewModel, 
+        Polyline, SimpleLineSymbol,
+        on) {
+      
+    var map = new Map({
+        basemap: "streets-navigation-vector"
+    });
+
+    var gl = new GraphicsLayer();  
+    
+    map.add(gl);
+    
+
+    var view = new MapView({
+        container: "viewDiv",
+        map: map,
+        zoom: 40,
+        center: [15, 65]
+    });
+
+    // Create a symbol for drawing the point
+    var pointSymbol = new SimpleMarkerSymbol({
+        color: [226, 119, 40],
+        outline: { // autocasts as new SimpleMarkerSymbol()
+            color: [255, 255, 255],
+            width: 2
+        }
+    });
+
+    // Create a symbol for drawing the line
+    var lineSymbol = new SimpleLineSymbol({
+        color: [95, 151, 232],
+        width: 1
+    });
+      
+    var locateViewModel = new LocateViewModel({view: view, graphic: Graphic({ symbol: pointSymbol})});
+      
+    var locateWidget = new Locate({
+        viewModel: locateViewModel,
+        graphicsLayer: gl,
+        goToLocationEnabled: false // Later custom goTo was installed
+    });
+      
+    view.ui.add(locateWidget, "bottom-left");
+      
+    navigator.geolocation.getCurrentPosition(function(position) { // As soon as we got our position: draw a symbol and install some events
+
+        var latestLocation = {latitude: position.coords.latitude, longitude: position.coords.longitude}
+        var initialPoint = new Point(latestLocation);
+        
+        var pointGraphic = new Graphic({
+            geometry: initialPoint,
+            symbol: pointSymbol
+        });
+        
+        view.then(function(){
+            view.graphics.add(pointGraphic);
+            view.goTo({target: initialPoint, zoom: 15}, {duration: 2000});
+
+            var polylineGraphic = null;
+
+            view.on("click", function(e){ // Once user clicked on the map: show popup and draw a line between our and clicked positions
+                e.stopPropagation(); //FIXES LEFT-CLICK ISSUE!!!
+
+                if(polylineGraphic){
+                    view.graphics.remove(polylineGraphic);
+                    polylineGraphic = null;
+                }
+
+                view.popup.open({
+                    title: "The distance beetween:",
+                    location: e.mapPoint, // Set the location of the popup to the clicked location
+                    content: "<ul><li>Current and the clicked location: <b>" + countDistance(e.mapPoint.latitude, e.mapPoint.longitude, latestLocation.latitude, latestLocation.longitude).toFixed(1) + "m</b></li></ul>"
+                });
+
+                on.once(getElementByXpath('//*[@id="esri_widgets_Popup_0"]/div/div[1]/header/div/div[2]'), "click", function(e){ // remove the line once close button is clicked
+                    if(polylineGraphic){
+                        view.graphics.remove(polylineGraphic);
+                        polylineGraphic = null;
+                    }
+                });
+
+                on.once(getElementByXpath('//*[@id="viewDiv"]/div/div[3]/div[2]/div[3]/div'), "click", function(e){ // remove the line once widget's button is clicked
+                    if(polylineGraphic){
+                        view.graphics.remove(polylineGraphic);
+                        polylineGraphic = null;
+                    }
+                });
+
+                polylineGraphic = new Graphic({
+                    geometry: new Polyline({
+                        paths: [
+                            [e.mapPoint.longitude, e.mapPoint.latitude],
+                            [latestLocation.longitude, latestLocation.latitude]
+                        ]
+                    }),
+                    symbol: lineSymbol                    
+                });
+
+                view.graphics.add(polylineGraphic);
+            });
+            
+          
+            locateViewModel.on("locate", function(e){ // show popup and count distance once our position is found
+                if(polylineGraphic){
+                    view.graphics.remove(polylineGraphic);
+                    polylineGraphic = null;
+                }
+
+                if(pointGraphic){
+                    view.graphics.remove(pointGraphic);
+                    pointGraphic = null;
+                }
+
+                view.popup.visible = false; // hide current popup if it's visible
+
+                view.goTo({target: new Point([e.position.coords.longitude, e.position.coords.latitude]), zoom: 16}, {duration: 900});  
+
+                var initialDistance = countDistance(e.position.coords.latitude, e.position.coords.longitude, position.coords.latitude, position.coords.longitude).toFixed(1); 
+                var latestDistance = countDistance(e.position.coords.latitude, e.position.coords.longitude, latestLocation.latitude, latestLocation.longitude).toFixed(1);
+
+                setTimeout(function(){
+                    view.popup.open({
+                        // Set the popup's title to the coordinates of the clicked location
+                        title: "The distance beetween:",
+                        location: [e.position.coords.longitude, e.position.coords.latitude], // Set the location of the popup to the clicked location
+                        content: "<ul><li>Initial and current location: <b>" + initialDistance + "m</b></li>"
+                        + "<li>Latest and current location: <b>" + latestDistance + "m</b></li></ul>"
+                    });    
+                }, 1050);
+
+                latestLocation = {latitude: e.position.coords.latitude, longitude: e.position.coords.longitude};
+            });
+          
+        });
+
+        
+    });
+      
+      
+
+});
+
+function getElementByXpath(path) {
+  return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+}
+
+function countDistance(lat1, lon1, lat2, lon2) { // uses Haversine formula to return the distance beetween coords
+    var deg2rad = 0.017453292519943295; // === Math.PI / 180
+    var cos = Math.cos;
+    lat1 *= deg2rad;
+    lon1 *= deg2rad;
+    lat2 *= deg2rad;
+    lon2 *= deg2rad;
+    var a = (
+        (1 - cos(lat2 - lat1)) +
+        (1 - cos(lon2 - lon1)) * cos(lat1) * cos(lat2)
+    ) / 2;
+
+    return 12742 * Math.asin(Math.sqrt(a)) * 1000; // Diameter of the earth in km (2 * 6371)
+}
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>
