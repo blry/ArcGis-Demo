@@ -1,18 +1,18 @@
 define([
     'dojo/_base/declare',
     'jimu/BaseWidget',
-    'esri/tasks/query',
+    'esri/tasks/Query',
     'esri/tasks/QueryTask',
     'esri/symbols/SimpleFillSymbol',
     'esri/symbols/SimpleLineSymbol',
     'esri/Color'],
-function(declare, BaseWidget, Query,QueryTask, SimpleFillSymbol, SimpleLineSymbol, Color) {
+function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymbol, Color) {
   return declare([BaseWidget], {
 
     baseClass: 'jimu-widget-mywidget',
     queryTask: null,
     selectionSymbol: null,
-    featureSet: null,
+    features: null,
 
     startup: function() {
         this.inherited(arguments);
