@@ -2,16 +2,17 @@ define([
     'dojo/_base/declare',
     'jimu/BaseWidget',
     'esri/tasks/query',
-    'esri/tasks/QueryTask',
+    'esri/InfoTemplate',
+    'esri/layers/FeatureLayer',
     'esri/symbols/SimpleFillSymbol',
     'esri/symbols/SimpleLineSymbol',
     'esri/Color',
     'esri/graphicsUtils'],
-function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymbol, Color, graphicsUtils) {
+function(declare, BaseWidget, Query, InfoTemplate, FeatureLayer, SimpleFillSymbol, SimpleLineSymbol, Color, graphicsUtils) {
   return declare([BaseWidget], {
 
     baseClass: 'jimu-widget-mywidget',
-    queryTask: null,
+    featureLayer: null,
     selectionSymbol: null,
     features: null,
     extent: null,
@@ -19,7 +20,15 @@ function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymb
     startup: function() {
         this.inherited(arguments);
 
-        this.queryTask = new QueryTask("http://demographics6.arcgis.com/arcgis/rest/services/USA_Demographics_and_Boundaries_2016/MapServer/43");
+        var infoTemplate = new InfoTemplate("Attributes", "State Name: ${STATE_NAME}<br>Median Age: ${MEDAGE_CY}<br>Per Capita Income: $${PCI_CY}<br>Population: ${TOTPOP_CY}");
+
+        this.featureLayer = new FeatureLayer("http://demographics6.arcgis.com/arcgis/rest/services/USA_Demographics_and_Boundaries_2016/MapServer/43", {
+            mode: FeatureLayer.MODE_ONDEMAND,
+            infoTemplate: infoTemplate,
+            outFields: ['*']
+        });
+
+        this.map.addLayer(this.featureLayer);
 
         this.selectionSymbol =
             new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
@@ -55,12 +64,12 @@ function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymb
         if(this.PCI_to.value != '0')
             query.where += ' AND PCI_CY <= ' + this.PCI_to.value;
         
-        this.queryTask.execute(query, (function(featureSet){
+        this.featureLayer.queryFeatures(query, (function (featureSet){
             this.map.graphics.clear();
 
             this.features = featureSet.features;
-            this.extent = graphicsUtils.graphicsExtent(this.features);
-            this.map.setExtent(this.extent.expand(1.1));
+            this.extent = graphicsUtils.graphicsExtent(this.features).expand(1.1);
+            this.map.setExtent(this.extent);
 
             var states = '<table><tr><th>State</th><th>Med. Age</th><th>Population</th><th>PCI</th></tr>';
 
@@ -76,7 +85,7 @@ function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymb
     },
 
     onOpen: function(){
-        this.map.setExtent(this.extent.expand(1.1));
+        this.map.setExtent(this.extent);
         
         for (var i = 0; i < this.features.length; i++)
             this.map.graphics.add(this.features[i]);
