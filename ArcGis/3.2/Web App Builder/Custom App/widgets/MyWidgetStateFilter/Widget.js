@@ -14,6 +14,7 @@ function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymb
     queryTask: null,
     selectionSymbol: null,
     features: null,
+    extent: null,
 
     startup: function() {
         this.inherited(arguments);
@@ -58,8 +59,8 @@ function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymb
             this.map.graphics.clear();
 
             this.features = featureSet.features;
-
-            this.map.setExtent(graphicsUtils.graphicsExtent(this.features).expand(1.1));
+            this.extent = graphicsUtils.graphicsExtent(this.features);
+            this.map.setExtent(this.extent.expand(1.1));
 
             var states = '<table><tr><th>State</th><th>Med. Age</th><th>Population</th><th>PCI</th></tr>';
 
@@ -75,6 +76,8 @@ function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymb
     },
 
     onOpen: function(){
+        this.map.setExtent(this.extent.expand(1.1));
+        
         for (var i = 0; i < this.features.length; i++)
             this.map.graphics.add(this.features[i]);
     },
