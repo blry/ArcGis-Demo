@@ -5,8 +5,9 @@ define([
     'esri/tasks/QueryTask',
     'esri/symbols/SimpleFillSymbol',
     'esri/symbols/SimpleLineSymbol',
-    'esri/Color'],
-function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymbol, Color) {
+    'esri/Color',
+    'esri/graphicsUtils'],
+function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymbol, Color, graphicsUtils) {
   return declare([BaseWidget], {
 
     baseClass: 'jimu-widget-mywidget',
@@ -57,6 +58,8 @@ function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymb
             this.map.graphics.clear();
 
             this.features = featureSet.features;
+
+            this.map.setExtent(graphicsUtils.graphicsExtent(this.features).expand(1.1));
 
             var states = '<table><tr><th>State</th><th>Med. Age</th><th>Population</th><th>PCI</th></tr>';
 
