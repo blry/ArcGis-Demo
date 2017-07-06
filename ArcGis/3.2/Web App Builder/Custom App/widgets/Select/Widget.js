@@ -74,6 +74,8 @@ SelectableLayerItem, FeatureItem) {
         geoTypes: this.config.geometryTypes || ['EXTENT']
       });
 
+      console.log(2);
+
       html.place(this.selectDijit.domNode, this.selectDijitNode);
       this.selectDijit.startup();
 
@@ -112,6 +114,7 @@ SelectableLayerItem, FeatureItem) {
 
         layerUtil.getLayerInfoArray(layerInfosObject)
           .then(lang.hitch(this, function(layerInfoArray) {
+            console.log(layerInfoArray);
             this._initLayers(layerInfoArray);
           }));
       })));

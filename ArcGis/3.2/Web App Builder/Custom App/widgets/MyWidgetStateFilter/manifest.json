@@ -1,0 +1,10 @@
+{
+  "name": "MyWidget: State filter",
+  "platform": "HTML",
+  "version": "2.4",
+  "wabVersion": "2.4",
+  "author": "Alexander Sterpu",
+  "description": "The widget used to filter states by median age, population and PCI",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0"
+}
