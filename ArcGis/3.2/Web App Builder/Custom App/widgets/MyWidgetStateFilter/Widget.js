@@ -107,6 +107,9 @@ function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymb
 
     onClose: function(){
         this.map.graphics.clear();
+
+        if(this.map.infoWindow.isShowing)
+            this.map.infoWindow.hide();
     },
   });
 });
