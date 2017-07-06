@@ -1,7 +1,7 @@
 define([
     'dojo/_base/declare',
     'jimu/BaseWidget',
-    'esri/tasks/Query',
+    'esri/tasks/query',
     'esri/tasks/QueryTask',
     'esri/symbols/SimpleFillSymbol',
     'esri/symbols/SimpleLineSymbol',
