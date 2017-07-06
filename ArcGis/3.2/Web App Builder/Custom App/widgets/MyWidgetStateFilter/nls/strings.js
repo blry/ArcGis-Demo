@@ -4,6 +4,6 @@ define({
     median_age: "Median Age",
     pci: "PCI",
     population: "Population",
-    query: "Query"
+    select: "Select"
   })
 });

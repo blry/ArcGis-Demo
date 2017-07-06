@@ -1,32 +1,32 @@
-.jimu-widget-mywidget input{
+.jimu-widget-mywidgetstatefilter input{
     font-size: 15px;
     text-align: center;
     padding: 3px;
     width: 60px;
 }
-.jimu-widget-mywidget .range{
+.jimu-widget-mywidgetstatefilter .range{
     height: 25px;
 
     vertical-align: text-bottom;
     position: relative;
 }
-.jimu-widget-mywidget .range div{
+.jimu-widget-mywidgetstatefilter .range div{
     float: right;
 }
 @media(max-height: 430px){
-    .jimu-widget-mywidget .range div{
+    .jimu-widget-mywidgetstatefilter .range div{
         width: 100px;
     }
 }
 @media(min-height: 430px){
-    .jimu-widget-mywidget .range div{
+    .jimu-widget-mywidgetstatefilter .range div{
     margin-bottom: -5px;
     position: absolute;
     right: 40px;
     bottom: 12px;
 }
 }
-.jimu-widget-mywidget input[type=number]{
+.jimu-widget-mywidgetstatefilter input[type=number]{
     width: 85px;
     margin: 0 5px;
     background: transparent;
@@ -34,10 +34,10 @@
     text-align: left;
     border-bottom: 1px solid black;
 }
-.jimu-widget-mywidget th{
+.jimu-widget-mywidgetstatefilter th{
     font-weight: bold;
      padding: 2px 10px;
 }
-.jimu-widget-mywidget td{
+.jimu-widget-mywidgetstatefilter td{
     padding: 2px 10px;
 }
