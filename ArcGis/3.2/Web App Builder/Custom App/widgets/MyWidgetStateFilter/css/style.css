@@ -12,10 +12,19 @@
 }
 .jimu-widget-mywidget .range div{
     float: right;
+}
+@media(max-height: 430px){
+    .jimu-widget-mywidget .range div{
+        width: 100px;
+    }
+}
+@media(min-height: 430px){
+    .jimu-widget-mywidget .range div{
     margin-bottom: -5px;
     position: absolute;
     right: 40px;
     bottom: 12px;
+}
 }
 .jimu-widget-mywidget input[type=number]{
     width: 85px;
