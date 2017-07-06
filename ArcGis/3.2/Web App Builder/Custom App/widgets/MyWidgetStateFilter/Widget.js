@@ -17,7 +17,7 @@ function(declare, BaseWidget, Query, InfoTemplate, FeatureLayer, SimpleFillSymbo
     features: null,
     extent: null,
 
-    startup: function() {
+    constructor: function(){
         this.inherited(arguments);
 
         var infoTemplate = new InfoTemplate("Attributes", "State Name: ${STATE_NAME}<br>Median Age: ${MEDAGE_CY}<br>Per Capita Income: $${PCI_CY}<br>Population: ${TOTPOP_CY}");
@@ -28,12 +28,17 @@ function(declare, BaseWidget, Query, InfoTemplate, FeatureLayer, SimpleFillSymbo
             outFields: ['*']
         });
 
-        this.map.addLayer(this.featureLayer);
-
         this.selectionSymbol =
             new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
                 new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT,
                     new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.5]));
+
+    },
+
+    startup: function() {
+        this.inherited(arguments);
+
+        this.map.addLayer(this.featureLayer);
 
         this._selectFeatures();       
     },
