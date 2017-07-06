@@ -3,30 +3,27 @@ define([
     'jimu/BaseWidget',
     'esri/tasks/query',
     'esri/InfoTemplate',
-    'esri/layers/FeatureLayer',
+    'esri/tasks/QueryTask',
     'esri/symbols/SimpleFillSymbol',
     'esri/symbols/SimpleLineSymbol',
     'esri/Color',
     'esri/graphicsUtils'],
-function(declare, BaseWidget, Query, InfoTemplate, FeatureLayer, SimpleFillSymbol, SimpleLineSymbol, Color, graphicsUtils) {
+function(declare, BaseWidget, Query, InfoTemplate, QueryTask, SimpleFillSymbol, SimpleLineSymbol, Color, graphicsUtils) {
   return declare([BaseWidget], {
 
     baseClass: 'jimu-widget-mywidget',
-    featureLayer: null,
+    queryTask: null,
     selectionSymbol: null,
     features: null,
     extent: null,
+    infoTemplate: null,
 
     constructor: function(){
         this.inherited(arguments);
 
-        var infoTemplate = new InfoTemplate("Attributes", "State Name: ${STATE_NAME}<br>Median Age: ${MEDAGE_CY}<br>Per Capita Income: $${PCI_CY}<br>Population: ${TOTPOP_CY}");
+        this.infoTemplate = new InfoTemplate("Attributes", "State Name: ${STATE_NAME}<br>Median Age: ${MEDAGE_CY}<br>Per Capita Income: $${PCI_CY}<br>Population: ${TOTPOP_CY}");
 
-        this.featureLayer = new FeatureLayer("http://demographics6.arcgis.com/arcgis/rest/services/USA_Demographics_and_Boundaries_2016/MapServer/43", {
-            mode: FeatureLayer.MODE_ONDEMAND,
-            infoTemplate: infoTemplate,
-            outFields: ["STATE_NAME", "MEDAGE_CY", "PCI_CY", "TOTPOP_CY"]
-        });
+        this.queryTask = new QueryTask("http://demographics6.arcgis.com/arcgis/rest/services/USA_Demographics_and_Boundaries_2016/MapServer/43");
 
         this.selectionSymbol =
             new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
@@ -37,8 +34,6 @@ function(declare, BaseWidget, Query, InfoTemplate, FeatureLayer, SimpleFillSymbo
 
     startup: function() {
         this.inherited(arguments);
-
-        this.map.addLayer(this.featureLayer);
 
         this._selectFeatures();       
     },
@@ -69,7 +64,7 @@ function(declare, BaseWidget, Query, InfoTemplate, FeatureLayer, SimpleFillSymbo
         if(this.PCI_to.value != '0')
             query.where += ' AND PCI_CY <= ' + this.PCI_to.value;
         
-        this.featureLayer.queryFeatures(query, (function (featureSet){
+        this.queryTask.execute(query, (function (featureSet){
             this.map.graphics.clear();
 
             this.features = featureSet.features;
@@ -80,6 +75,7 @@ function(declare, BaseWidget, Query, InfoTemplate, FeatureLayer, SimpleFillSymbo
 
             for (var i = 0; i < this.features.length; i++) {
                 this.features[i].setSymbol(this.selectionSymbol);
+                this.features[i].infoTemplate = this.infoTemplate;
                 states += '<tr><td>' + this.features[i].attributes.STATE_NAME + '</td><td>' + this.features[i].attributes.MEDAGE_CY + '</td><td>' 
                        + this.features[i].attributes.TOTPOP_CY + '</td><td>$ ' + this.features[i].attributes.PCI_CY + '</td></tr>';
                 this.map.graphics.add(this.features[i]);
