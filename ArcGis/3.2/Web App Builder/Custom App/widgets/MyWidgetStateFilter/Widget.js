@@ -25,7 +25,7 @@ function(declare, BaseWidget, Query, InfoTemplate, FeatureLayer, SimpleFillSymbo
         this.featureLayer = new FeatureLayer("http://demographics6.arcgis.com/arcgis/rest/services/USA_Demographics_and_Boundaries_2016/MapServer/43", {
             mode: FeatureLayer.MODE_ONDEMAND,
             infoTemplate: infoTemplate,
-            outFields: ['*']
+            outFields: ["STATE_NAME", "MEDAGE_CY", "PCI_CY", "TOTPOP_CY"]
         });
 
         this.selectionSymbol =
