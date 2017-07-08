@@ -10,7 +10,6 @@ define([
     'esri/graphicsUtils'],
 function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymbol, Color, InfoTemplate, graphicsUtils) {
   return declare([BaseWidget], {
-
     baseClass: 'jimu-widget-mywidgetstatefilter',
     queryTask: null,
     selectionSymbol: null,
@@ -49,22 +48,22 @@ function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymb
         
         query.where = '1 = 1';
 
-        if(this.MEDAGE_from.value != '0')
+        if(this.MEDAGE_from.value > 0)
             query.where += ' AND MEDAGE_CY >= ' + this.MEDAGE_from.value;
         
-        if(this.MEDAGE_to.value != '0')
+        if(this.MEDAGE_to.value > 0)
             query.where += ' AND MEDAGE_CY <= ' + this.MEDAGE_to.value;
 
-        if(this.TOTPOP_from.value != '0')
+        if(this.TOTPOP_from.value > 0)
             query.where += ' AND TOTPOP_CY >= ' + this.TOTPOP_from.value;
         
-        if(this.TOTPOP_to.value != '0')
+        if(this.TOTPOP_to.value > 0)
             query.where += ' AND TOTPOP_CY <= ' + this.TOTPOP_to.value;
 
-        if(this.PCI_from.value != '0')
+        if(this.PCI_from.value > 0)
             query.where += ' AND PCI_CY >= ' + this.PCI_from.value;
 
-        if(this.PCI_to.value != '0')
+        if(this.PCI_to.value > 0)
             query.where += ' AND PCI_CY <= ' + this.PCI_to.value;
         
         this.queryTask.execute(query, (function (featureSet){
@@ -85,8 +84,6 @@ function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymb
                     states += '<tr><td>' + this.features[i].attributes.STATE_NAME + '</td><td>' + this.features[i].attributes.MEDAGE_CY + '</td><td>' 
                            + this.features[i].attributes.TOTPOP_CY + '</td><td>$ ' + this.features[i].attributes.PCI_CY + '</td></tr>';
                 }
-
-                
             }else{
                 this.extent = null;
                 states += '<tr><td colspan=4><center>No values</center></tr>';
@@ -106,10 +103,10 @@ function(declare, BaseWidget, Query, QueryTask, SimpleFillSymbol, SimpleLineSymb
     },
 
     onClose: function(){
-        this.map.graphics.clear();
-
         if(this.map.infoWindow.isShowing)
             this.map.infoWindow.hide();
+
+        this.map.graphics.clear();
     },
   });
 });
